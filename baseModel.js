@@ -48,7 +48,7 @@ export class BaseModel {
       (err, rowCount, rows) => {
         if (err) {
           console.log("error", err);
-          //connection.close();
+
           callbback(null, err);
           return;
         }
@@ -66,7 +66,7 @@ export class BaseModel {
         self.result = tmp;
 
         console.log("result", self.result);
-        //connection.close();
+
         callbback(self.result, null);
       }
     );
@@ -75,14 +75,13 @@ export class BaseModel {
   }
 
   save(callbback) {
-    //this.connecToDb();
     var TYPES = tedious.TYPES;
     var self = this;
     self.result = 0;
     var req = new tedious.Request(`dbo.sp_insertar_${this.table}`, (err) => {
       if (err) {
         console.log("error", err);
-        //connection.close();
+
         callbback(null, err);
         return;
       }
@@ -106,7 +105,7 @@ export class BaseModel {
     var req = new tedious.Request(`dbo.sp_actualizar_${this.table}`, (err) => {
       if (err) {
         console.log("error", err);
-        //connection.close();
+
         callbback(null, err);
         return;
       }
@@ -115,6 +114,26 @@ export class BaseModel {
       console.log(fieldName, "->", self[fieldName]);
       req.addParameter(fieldName, TYPES.NVarChar, self[fieldName]);
     });
+    req.addOutputParameter("rowCount", TYPES.Int);
+    req.on("returnValue", function (paramName, value, metadata) {
+      callbback({ actualizados: value }, null);
+    });
+    connection.callProcedure(req);
+  }
+  delete(callbback) {
+    var TYPES = tedious.TYPES;
+    var self = this;
+    self.result = 0;
+    var req = new tedious.Request(`dbo.sp_eliminar_${this.table}`, (err) => {
+      if (err) {
+        console.log("error", err);
+
+        callbback(null, err);
+        return;
+      }
+    });
+    req.addParameter("id", TYPES.NVarChar, self.id);
+
     req.addOutputParameter("rowCount", TYPES.Int);
     req.on("returnValue", function (paramName, value, metadata) {
       callbback({ actualizados: value }, null);

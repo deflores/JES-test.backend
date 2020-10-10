@@ -32,4 +32,10 @@ export class MPFiscaliasController extends BaseController {
     model.telefono = dto.telefono;
     model.update(this.responseCallback);
   }
+
+  eliminar(id){
+    var model = new FiscaliaModel();
+    model.id = id;
+    model.delete(this.responseCallback);
+  }
 }
